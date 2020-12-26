@@ -219,7 +219,28 @@ class Peppymeter(ScreensaverMeter):
         """
         pass
        
+def get_lock():
+    import socket
+    import sys
+
+    process_name = "PeppyMeter"
+    get_lock._lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+
+    try:
+        # The null byte (\0) means the the socket is created
+        # in the abstract namespace instead of being created
+        # on the file system itself.
+        # Works only in Linux
+        get_lock._lock_socket.bind('\0' + process_name)
+        print("Acquired the running token")
+    except socket.error:
+        print("Can't acquire the running token")
+        sys.exit()
+
 if __name__ == "__main__":
+    """ Make sure there is only one instnace running """
+    get_lock()
+
     """ This is called by stand-alone PeppyMeter """
     pm = Peppymeter(standalone=True)
     if pm.util.meter_config[DATA_SOURCE][TYPE] != SOURCE_PIPE:
