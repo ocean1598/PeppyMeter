@@ -70,8 +70,7 @@ class DataSource(object):
         self.double_rng.extend(range(int(self.max_in_ui) - 1, int(self.min), -1))
         self.pipe = None
         if self.ds_type == SOURCE_PIPE:
-            thread = Thread(target=self.open_pipe)
-            thread.start()
+            self.open_pipe()
         self.previous_left = self.previous_right = self.previous_mono = 0.0
         self.run_flag = True
         self.polling_interval = self.config[POLLING_INTERVAL]
