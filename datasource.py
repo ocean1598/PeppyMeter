@@ -81,7 +81,9 @@ class DataSource(object):
         self.smooth_buffer = deque(self.smooth_buffer_size*[0], self.smooth_buffer_size)
         for _ in range(self.smooth_buffer_size):
             self.smooth_buffer.append((0,0,0))
-    
+
+        self.silence_count = 0  # detect silence
+
     def open_pipe(self):
         """ Open named pipe """
 
@@ -298,6 +300,13 @@ class DataSource(object):
             self.previous_left = left
             self.previous_right = right
             self.previous_mono = mono
+
+            # detect long silence, mono is based on left & right channel values
+            if mono == 0.0:
+                self.silence_count += 1
+            else:
+                self.silence_count = 0
+
         except Exception as e:
             logging.debug(e)
         

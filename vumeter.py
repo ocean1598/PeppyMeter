@@ -20,7 +20,7 @@ import time
 import copy
 from meterfactory import MeterFactory
 from screensavermeter import ScreensaverMeter
-from configfileparser import METER, METER_NAMES, RANDOM_METER_INTERVAL
+from configfileparser import METER, METER_NAMES, RANDOM_METER_INTERVAL, FRAME_RATE
 
 class Vumeter(ScreensaverMeter):
     """ VU Meter plug-in. """
@@ -46,6 +46,7 @@ class Vumeter(ScreensaverMeter):
         self.meter = None
         self.current_volume = 100.0
         self.seconds = 0
+        self.toggle = False # qualifying silence duration to consider random meter refresh
     
     def get_meter(self):
         """ Creates meter using meter factory. """  
@@ -86,10 +87,21 @@ class Vumeter(ScreensaverMeter):
     def refresh(self):
         """ Refresh meter. Used to update random meter. """ 
                
-        if self.random_meter and self.seconds == self.random_meter_interval:
+        if self.random_meter and self._should_refresh_random_meter():
             self.seconds = 0
             self.stop()
             time.sleep(0.2) # let threads stop
             self.start()
         self.seconds += 1
         pass
+
+    def _should_refresh_random_meter(self):
+        if self.random_meter_interval == 0: # special mode that refresh every new music
+            if self.data_source.silence_count == self.util.meter_config[FRAME_RATE]:    # 1s of silence
+                self.toggle = True
+            elif self.data_source.silence_count == 0 and self.toggle:   # after 1s of silence, music starts
+                self.toggle = False
+                return True
+            return False
+        else:
+            return self.seconds == self.random_meter_interval   # original
