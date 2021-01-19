@@ -138,9 +138,9 @@ class Peppymeter(ScreensaverMeter):
         else:            
             pygame.init()
             pygame.display.set_caption("Peppy Meter")
-            
-        self.util.PYGAME_SCREEN = pygame.display.set_mode((screen_w, screen_h), pygame.DOUBLEBUF, depth)        
-        self.util.meter_config[SCREEN_RECT] = pygame.Rect(0, 0, screen_w, screen_h) 
+
+        self.util.PYGAME_SCREEN = pygame.display.set_mode((screen_w, screen_h), pygame.DOUBLEBUF, depth)
+        self.util.meter_config[SCREEN_RECT] = pygame.Rect(0, 0, screen_w, screen_h)
     
     def start_interface_outputs(self):
         """ Starts writing to Serial and I@C interfaces """
@@ -174,6 +174,8 @@ class Peppymeter(ScreensaverMeter):
         while 1:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    self.exit()
+                elif event.type == pygame.MOUSEMOTION or event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.MOUSEBUTTONUP:
                     self.exit()
                 elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
                     keys = pygame.key.get_pressed() 
